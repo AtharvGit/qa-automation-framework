@@ -22,7 +22,7 @@ jobs:
       # This runs the EXACT same command you ran locally!
       # --exit-code-from test-runner means if tests fail, the pipeline fails.
       - name: Start Selenium Grid & Run Tests
-        run: docker-compose up --build --exit-code-from test-runner
+        run: docker compose up --build --exit-code-from test-runner
 
       # 3. Save the "allure-results" folder so we can use it in the next job
       - name: Upload Allure Results
