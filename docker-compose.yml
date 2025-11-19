@@ -1,0 +1,57 @@
+version: "3"
+
+services:
+  # 1. The Brain (Selenium Hub)
+  selenium-hub:
+    image: selenium/hub:latest
+    container_name: selenium-hub
+    ports:
+      - "4444:4444"
+    # NEW: Check if the Hub is actually ready to accept connections
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4444/status"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # 2. The Chrome Worker
+  chrome-node:
+    image: selenium/node-chrome:latest
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+    shm_size: '2g'
+
+  # 3. The Firefox Worker
+  firefox-node:
+    image: selenium/node-firefox:latest
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+    shm_size: '2g'
+
+  # 4. Our Test Runner
+  test-runner:
+    build: .
+    container_name: test-runner
+    # NEW: Wait for the Hub to be completely HEALTHY before starting
+    depends_on:
+      selenium-hub:
+        condition: service_healthy
+      chrome-node:
+        condition: service_started
+      firefox-node:
+        condition: service_started
+    environment:
+      - SE_HUB_HOST=selenium-hub
+    volumes:
+      - ./allure-results:/app/allure-results
+    command: >
+      bash -c "pytest -n 2 --remote --browser=chrome --alluredir=allure-results &&
+               pytest -n 2 --remote --browser=firefox --alluredir=allure-results"

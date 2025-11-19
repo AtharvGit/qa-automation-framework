@@ -1,0 +1,78 @@
+name: Automated QA Pipeline
+
+# When does this pipeline run?
+on:
+  push:
+    branches: [ main ]       # Runs when you push code
+  pull_request:
+    branches: [ main ]       # Runs when someone makes a Pull Request
+  workflow_dispatch:         # Adds a manual "Run" button in GitHub UI
+
+# The jobs to perform
+jobs:
+  test:
+    runs-on: ubuntu-latest   # Run on a Linux machine in the cloud
+
+    steps:
+      # 1. Get your code from the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # 2. Build and Run the Docker Grid
+      # This runs the EXACT same command you ran locally!
+      # --exit-code-from test-runner means if tests fail, the pipeline fails.
+      - name: Start Selenium Grid & Run Tests
+        run: docker-compose up --build --exit-code-from test-runner
+
+      # 3. Save the "allure-results" folder so we can use it in the next job
+      - name: Upload Allure Results
+        if: always() # Run this even if tests fail
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: allure-results
+          retention-days: 1
+
+  # A separate job to generate the report website
+  report:
+    needs: test              # Waits for 'test' job to finish
+    if: always()             # Run even if tests failed
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # 1. Download the results from the previous job
+      - name: Download Allure Results
+        uses: actions/download-artifact@v4
+        with:
+          name: allure-results
+          path: allure-results
+
+      # 2. Download previous history (so you can see trends over time)
+      - name: Get Allure History
+        uses: actions/checkout@v4
+        if: always()
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      # 3. Build the HTML Report
+      - name: Generate Report
+        uses: simple-elf/allure-report-action@master
+        if: always()
+        with:
+          allure_results: allure-results
+          allure_history: allure-history
+          keep_reports: 20
+
+      # 4. Publish the Report to the 'gh-pages' branch
+      - name: Deploy Report to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: allure-history

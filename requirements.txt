@@ -1,0 +1,13 @@
+# Core testing libraries
+pytest
+selenium
+webdriver-manager
+
+# Reporting (We'll add this now to have it ready)
+allure-pytest
+
+# Database (We'll use this later)
+# psycopg2-binary
+
+# Parallel testing (For later optimization)
+pytest-xdist
