@@ -1,0 +1,4 @@
+
+[setup] Starting firefox (Remote: True)...
+
+[teardown] quitting browser

@@ -1,0 +1,11 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","1209","test_add_single_item_to_cart","tests","Wed Nov 19 18:11:40 UTC 2025","passed","Wed Nov 19 18:11:41 UTC 2025","TestCart","test_cart","",""
+"
+        Test case to verify that the login page loads and elements are visible.
+        ","549","test_login_page_elements_are_visible","tests","Wed Nov 19 18:11:43 UTC 2025","passed","Wed Nov 19 18:11:44 UTC 2025","TestLoginPage","test_login_page","",""
+"
+        Test case to verify a valid login.
+        ","833","test_successful_login","tests","Wed Nov 19 18:11:36 UTC 2025","passed","Wed Nov 19 18:11:36 UTC 2025","TestLoginPage","test_login_page","",""
+"
+        Test case to verify error message for a locked-out user.
+        ","513","test_locked_out_user_login","tests","Wed Nov 19 18:11:36 UTC 2025","passed","Wed Nov 19 18:11:37 UTC 2025","TestLoginPage","test_login_page","",""
